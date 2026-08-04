@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Worst contacts first, editable in place so a fix is one click from the
+         problem rather than a round trip through the form. -->
+    <record id="view_contact_health_list" model="ir.ui.view">
+        <field name="name">res.partner.contact.health.list</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list string="Contact Health" default_order="ch_issue_count desc,name"
+                  editable="bottom" create="false">
+                <field name="name" readonly="1"/>
+                <field name="email"/>
+                <field name="ch_email_status" readonly="1"
+                       decoration-danger="ch_email_status not in ('ok','missing')"
+                       decoration-muted="ch_email_status in ('ok','missing')"/>
+                <field name="ch_email_detail" readonly="1" optional="show"/>
+                <field name="ch_missing" readonly="1" optional="show"/>
+                <field name="country_id" optional="hide"/>
+                <field name="phone" optional="hide"/>
+                <field name="is_company" column_invisible="1"/>
+                <field name="ch_issue_count" readonly="1"
+                       decoration-danger="ch_issue_count &gt; 1"
+                       decoration-warning="ch_issue_count &gt; 0"/>
+                <field name="ch_is_healthy" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_contact_health_search" model="ir.ui.view">
+        <field name="name">res.partner.contact.health.search</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <search string="Contact Health">
+                <field name="name"/>
+                <field name="email"/>
+
+                <filter name="has_issues" string="Has Issues"
+                        domain="[('ch_is_healthy','=',False)]"/>
+                <filter name="healthy" string="No Issues"
+                        domain="[('ch_is_healthy','=',True)]"/>
+                <separator/>
+                <filter name="bad_email" string="Unusable Email"
+                        domain="[('ch_email_status','not in',('ok','missing','duplicate'))]"
+                        help="The address is malformed and cannot receive mail."/>
+                <filter name="shared_email" string="Shared Email"
+                        domain="[('ch_email_status','=','duplicate')]"
+                        help="More than one contact uses this address."/>
+                <filter name="no_email" string="No Email"
+                        domain="[('ch_email_status','=','missing')]"
+                        help="Reported for visibility only. Never counted as an issue."/>
+                <separator/>
+                <filter name="company_no_country" string="Company Without Country"
+                        domain="[('is_company','=',True),('country_id','=',False)]"/>
+
+                <group>
+                    <filter name="group_email_status" string="Email Check"
+                            context="{'group_by': 'ch_email_status'}"/>
+                    <filter name="group_country" string="Country"
+                            context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_contact_health" model="ir.actions.act_window">
+        <field name="name">Contact Health</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_contact_health_list"/>
+        <field name="search_view_id" ref="view_contact_health_search"/>
+        <field name="context">{'search_default_has_issues': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Nothing to fix. Every contact has a usable address.
+            </p>
+            <p>
+                Just installed? Run <b>Contact Health &gt; Rescan Contacts</b> once so
+                contacts that already existed get checked.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_contact_health_rescan" model="ir.actions.server">
+        <field name="name">Rescan Contacts</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_contact_health_rescan()</field>
+    </record>
+
+    <!-- Tidy whitespace and domain case on whatever is selected in the list. -->
+    <record id="action_normalise_emails" model="ir.actions.server">
+        <field name="name">Tidy Email Addresses</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_normalise_emails()</field>
+    </record>
+
+    <menuitem id="menu_contact_health_root"
+              name="Contact Health"
+              web_icon="miko_contact_health,static/description/icon.png"
+              sequence="96"/>
+    <menuitem id="menu_contact_health_audit" name="Audit"
+              parent="menu_contact_health_root"
+              action="action_contact_health" sequence="10"/>
+    <menuitem id="menu_contact_health_rescan" name="Rescan Contacts"
+              parent="menu_contact_health_root"
+              action="action_contact_health_rescan" sequence="20"/>
+
+</odoo>
