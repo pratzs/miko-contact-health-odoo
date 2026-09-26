@@ -9,7 +9,7 @@ and follow up: malformed email addresses, contacts sharing an address, and the
 fields an invoice cannot be issued without.
 """,
     'author': 'Tripster Developers',
-    'website': 'https://tripsterdevelopers.com/odoo/',
+    'website': 'https://miko.co.nz/odoo/email-validation',
     'category': 'Sales/CRM',
     'license': 'OPL-1',
     'depends': ['base'],
