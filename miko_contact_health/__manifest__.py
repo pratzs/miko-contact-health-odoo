@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Email Validation & Duplicate Contacts (Miko)',
-    'version': '16.0.1.0.0',
-    'summary': 'Find unusable email addresses and duplicate contacts before they cost you an invoice',
+    'name': 'Contact Audit: Email Validation & Duplicate Contacts (Miko)',
+    'version': '16.0.1.0.1',
+    'summary': 'Email validator and duplicate contact finder, run locally: email verification of address syntax (no external service) and duplicate contacts that share an address, found before they cost you an invoice',
     'description': """
 Audits your contacts for the data faults that silently break invoicing, delivery
 and follow up: malformed email addresses, contacts sharing an address, and the
